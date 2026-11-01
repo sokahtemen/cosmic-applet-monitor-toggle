@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use cosmic::app::{Core, Task};
 use cosmic::iced::window::Id;
 use cosmic::iced::{Alignment, Length, Limits};
@@ -71,7 +73,7 @@ struct App {
     popup: Option<Id>,
     outputs: Vec<Output>,
     /// Last known positions of outputs we disabled, keyed by name.
-    saved_positions: Vec<(String, (i32, i32))>,
+    saved_positions: HashMap<String, (i32, i32)>,
     error: Option<String>,
 }
 
@@ -117,19 +119,13 @@ impl Application for App {
             }
             Message::Listed(Err(e)) => self.error = Some(e),
             Message::Set(name, enable) => {
-                let mut position = None;
                 if let Some(o) = self.outputs.iter_mut().find(|o| o.name == name) {
-                    if !enable {
-                        if let Some(p) = o.position {
-                            self.saved_positions.retain(|(n, _)| *n != name);
-                            self.saved_positions.push((name.clone(), p));
-                        }
+                    if let (false, Some(p)) = (enable, o.position) {
+                        self.saved_positions.insert(name.clone(), p);
                     }
                     o.enabled = enable;
                 }
-                if enable {
-                    position = self.saved_positions.iter().find(|(n, _)| *n == name).map(|(_, p)| *p);
-                }
+                let position = if enable { self.saved_positions.get(&name).copied() } else { None };
                 return Task::perform(set_enabled(name, enable, position), |r| {
                     cosmic::Action::App(Message::Listed(r))
                 });
