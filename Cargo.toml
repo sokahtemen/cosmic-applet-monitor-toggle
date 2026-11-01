@@ -2,6 +2,7 @@
 name = "cosmic-applet-monitor-toggle"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 libcosmic = { git = "https://github.com/pop-os/libcosmic", default-features = false, features = ["applet", "applet-token", "tokio", "wayland", "dbus-config"] }
