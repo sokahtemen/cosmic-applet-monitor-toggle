@@ -1,0 +1,11 @@
+[package]
+name = "cosmic-applet-monitor-toggle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libcosmic = { git = "https://github.com/pop-os/libcosmic", default-features = false, features = ["applet", "applet-token", "tokio", "wayland", "dbus-config"] }
+tokio = { version = "1", features = ["process"] }
+
+[profile.release]
+lto = "thin"

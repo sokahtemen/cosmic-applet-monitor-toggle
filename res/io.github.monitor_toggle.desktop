@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Monitor Toggle
+Comment=Másodlagos monitor be/ki
+Type=Application
+Exec=cosmic-applet-monitor-toggle
+Terminal=false
+Categories=COSMIC;
+Keywords=COSMIC;Iced;
+Icon=video-display-symbolic
+StartupNotify=true
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto
+X-OverflowPriority=10
