@@ -1,5 +1,4 @@
 use cosmic::app::{Core, Task};
-use cosmic::iced::platform_specific::shell::commands::popup::{destroy_popup, get_popup};
 use cosmic::iced::window::Id;
 use cosmic::iced::{Alignment, Length, Limits};
 use cosmic::widget::{self, text, Column, Row};
@@ -137,23 +136,32 @@ impl Application for App {
             }
             Message::TogglePopup => {
                 if let Some(id) = self.popup.take() {
-                    return destroy_popup(id);
+                    return cosmic::surface::surface_task(cosmic::surface::action::destroy_popup(id));
                 }
-                let id = Id::unique();
-                self.popup = Some(id);
-                let mut settings = self.core.applet.get_popup_settings(
-                    self.core.main_window_id().unwrap(),
-                    id,
+                // Open through libcosmic's surface action (as the stock applets do) so
+                // the popup gets the theme's frosted blur and rounded corners.
+                let popup = cosmic::surface::surface_task(cosmic::surface::action::app_popup(
+                    |_: &Self| Default::default(),
+                    |app: &mut Self| {
+                        let id = Id::unique();
+                        app.popup = Some(id);
+                        let mut settings = app.core.applet.get_popup_settings(
+                            app.core.main_window_id().unwrap(),
+                            id,
+                            None,
+                            None,
+                            None,
+                        );
+                        settings.positioner.size_limits = Limits::NONE
+                            .min_width(260.0)
+                            .max_width(360.0)
+                            .min_height(80.0)
+                            .max_height(500.0);
+                        settings
+                    },
                     None,
-                    None,
-                    None,
-                );
-                settings.positioner.size_limits = Limits::NONE
-                    .min_width(260.0)
-                    .max_width(360.0)
-                    .min_height(80.0)
-                    .max_height(500.0);
-                return Task::batch([get_popup(settings), refresh()]);
+                ));
+                return Task::batch([popup, refresh()]);
             }
             Message::PopupClosed(id) => {
                 if self.popup == Some(id) {
